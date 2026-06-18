@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
@@ -20,6 +20,23 @@ class Cliente(db.Model):
 
 with app.app_context():
     db.create_all()
+
+@app.after_request
+def agregar_cors(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type, X-API-Secret'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, DELETE, OPTIONS'
+    return response
+
+@app.route('/options', methods=['OPTIONS'])
+@app.route('/<path:path>', methods=['OPTIONS'])
+def options(path=''):
+    return '', 204
+
+@app.route('/')
+@app.route('/panel')
+def panel():
+    return send_from_directory('.', 'panel_admin.html')
 
 def verificar_secret(req):
     return req.headers.get('X-API-Secret') == API_SECRET
